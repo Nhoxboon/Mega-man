@@ -10,6 +10,10 @@ public class InputManager : MonoBehaviour
     protected Vector4 direction;
     public Vector4 Direction => direction;
 
+    protected bool dashInput;
+    public bool DashInput => dashInput;
+
+
     private void Awake()
     {
         if (InputManager.instance != null)
@@ -37,9 +41,13 @@ public class InputManager : MonoBehaviour
         this.direction.z = Input.GetKey(KeyCode.W) ? 1 : 0;
         if (this.direction.z == 0) this.direction.z = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
+        this.dashInput = Input.GetKeyDown(KeyCode.C);
+
 
         //if (this.direction.x == 1) Debug.Log("Left");
         //if (this.direction.y == 1) Debug.Log("Right");
         //if (this.direction.z == 1) Debug.Log("Up");
     }
+
+
 }
