@@ -41,7 +41,7 @@ public class InputManager : MonoBehaviour
         this.direction.z = Input.GetKey(KeyCode.W) ? 1 : 0;
         if (this.direction.z == 0) this.direction.z = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
-        this.dashInput = Input.GetKeyDown(KeyCode.C);
+        this.dashInput = Input.GetKey(KeyCode.C);
 
 
         //if (this.direction.x == 1) Debug.Log("Left");

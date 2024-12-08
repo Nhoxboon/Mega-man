@@ -11,15 +11,17 @@ public class PlayerMovement : NhoxMonoBehaviour
     [Header("Movement Settings")]
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] float jumpSpeed = 3.7f;
-    [SerializeField] float wallJumpForce = 10f;  // Lực nhảy tường
+    [SerializeField] float wallJumpForce = 10f;
 
     [Header("Dash Settings")]
-    [SerializeField] private float dashingPower = 24f;
-    [SerializeField] private float dashingTime = 0.2f;
-    [SerializeField] private float dashingCooldown = 1f;
-
-    protected bool canDash = true;
     protected bool isDashing;
+    [SerializeField] protected float dashTime;
+    [SerializeField] protected float dashSpeed = 10f;
+    [SerializeField] protected float distanceBwImages;
+    [SerializeField] protected float dashCoolDown;
+    [SerializeField] protected float dashTimeLeft;
+    [SerializeField] protected float lastImageXpos;
+    [SerializeField] protected float lastDash = -100f;
 
     [Header("Detection Settings")]
     [SerializeField] float raycastDistance = 0.05f;
@@ -42,6 +44,8 @@ public class PlayerMovement : NhoxMonoBehaviour
 
     private void FixedUpdate()
     {
+        HandleDash();
+        CheckDash();
         CheckGroundedAndWalls();
         HandleMovement();
         UpdateState();
@@ -118,15 +122,9 @@ public class PlayerMovement : NhoxMonoBehaviour
 
     void HandleMovement()
     {
-        if (InputManager.Instance.DashInput && canDash && !isDashing)
-        {
-            StartCoroutine(Dash());
-        }
-        else
-        {
-            HandleHorizontalMovement();
-            HandleJump();
-        }
+        if (isDashing) return;
+        HandleHorizontalMovement();
+        HandleJump();
     }
 
     void HandleHorizontalMovement()
@@ -156,7 +154,7 @@ public class PlayerMovement : NhoxMonoBehaviour
         if (InputManager.Instance.Direction.z > 0 && isGrounded)
         {
             rb2d.velocity = new Vector2(rb2d.velocity.x, jumpSpeed);
-            stateManager = PlayerState.Jump; // Nhảy lên
+            stateManager = PlayerState.Jump;
         }
         else if (InputManager.Instance.Direction.z > 0 && isWallSliding)
         {
@@ -164,36 +162,55 @@ public class PlayerMovement : NhoxMonoBehaviour
             float wallJumpDirection = isFacingRight ? -1f : 1f;
             rb2d.velocity = new Vector2(wallJumpDirection * wallJumpForce, jumpSpeed);
             isWallSliding = false;
-            stateManager = PlayerState.WallJumping; // Nhảy tường
+            stateManager = PlayerState.WallJumping;
         }
     }
 
-    private IEnumerator Dash()
+    protected virtual void HandleDash()
     {
-        canDash = false;
+        if(InputManager.Instance.DashInput && Time.time >= (lastDash + dashCoolDown))
+        {
+            if (Time.time >= (lastDash + dashCoolDown)) 
+                AttemptToDash();
+        }
+    }
+
+    protected virtual void AttemptToDash()
+    {
         isDashing = true;
+        dashTimeLeft = dashTime;
+        lastDash = Time.time;
 
-        // Lưu trọng lực ban đầu và vô hiệu hóa trọng lực khi Dash
-        float originalGravity = rb2d.gravityScale;
-        rb2d.gravityScale = 0f;
-
-        // Thiết lập vận tốc Dash theo hướng đang đối mặt
-        rb2d.velocity = new Vector2((isFacingRight ? 1 : -1) * dashingPower, 0f);
-
-        // Đặt trạng thái Animator nếu cần
         stateManager = PlayerState.Dash;
 
-        // Thời gian Dash
-        yield return new WaitForSeconds(dashingTime);
-
-        // Khôi phục trạng thái sau Dash
-        rb2d.gravityScale = originalGravity;
-        isDashing = false;
-
-        // Cooldown trước khi Dash lại
-        yield return new WaitForSeconds(dashingCooldown);
-        canDash = true;
+        PlayerAfterImagePool.Instance.GetFromPool();
+        lastImageXpos = transform.position.x;
     }
+
+    protected virtual void CheckDash()
+    {
+        if (isDashing)
+        {
+            // Tiến hành Dash
+            if (dashTimeLeft > 0)
+            {
+                rb2d.velocity = new Vector2(isFacingRight ? dashSpeed : -dashSpeed, 0f);
+                dashTimeLeft -= Time.fixedDeltaTime;
+
+                // Tạo AfterImage khi di chuyển
+                if (Mathf.Abs(transform.parent.position.x - lastImageXpos) > distanceBwImages)
+                {
+                    PlayerAfterImagePool.Instance.GetFromPool();
+                    lastImageXpos = transform.parent.position.x;
+                }
+            }
+            else
+            {
+                isDashing = false;
+            }
+        }
+    }
+
 
     void Flip()
     {
@@ -205,7 +222,7 @@ public class PlayerMovement : NhoxMonoBehaviour
     {
         if (isDashing)
         {
-            stateManager = PlayerState.Dash;
+            stateManager = PlayerState.Dash; // Giữ trạng thái Dash
             return;
         }
 
@@ -213,27 +230,27 @@ public class PlayerMovement : NhoxMonoBehaviour
         {
             if (Mathf.Abs(rb2d.velocity.x) > 0.1f)
             {
-                stateManager = PlayerState.Run; // Đang chạy
+                stateManager = PlayerState.Run; 
             }
             else
             {
-                stateManager = PlayerState.Idle; // Đứng yên
+                stateManager = PlayerState.Idle; 
             }
         }
         else
         {
             if (rb2d.velocity.y > 0)
             {
-                stateManager = PlayerState.Jump; // Nhảy lên
+                stateManager = PlayerState.Jump; 
             }
             else if (rb2d.velocity.y < 0)
             {
-                stateManager = PlayerState.Fall; // Rơi xuống
+                stateManager = PlayerState.Fall; 
             }
 
             if (isWallSliding)
             {
-                stateManager = PlayerState.WallSliding; // Trượt tường
+                stateManager = PlayerState.WallSliding;
             }
         }
     }
