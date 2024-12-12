@@ -13,6 +13,9 @@ public class InputManager : MonoBehaviour
     protected bool dashInput;
     public bool DashInput => dashInput;
 
+    [SerializeField] protected float onFiring;
+    public float OnFiring => onFiring;
+
 
     private void Awake()
     {
@@ -25,9 +28,14 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
+        this.GetMouseDown();
         this.GetDirectionByKeyDown();
     }
 
+    protected virtual void GetMouseDown()
+    {
+        this.onFiring = Input.GetAxis("Fire1");
+    }
 
 
     protected virtual void GetDirectionByKeyDown()

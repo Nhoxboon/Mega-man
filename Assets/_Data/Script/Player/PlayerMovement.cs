@@ -29,7 +29,7 @@ public class PlayerMovement : NhoxMonoBehaviour
 
     bool isGrounded;
     bool isFacingRight = true;
-    bool isWallSliding = false;  // Kiểm tra xem có đang trượt tường không
+    bool isWallSliding = false;  
 
     [SerializeField] protected PlayerState stateManager = PlayerState.Idle;
     public PlayerState StateManager => stateManager;
@@ -61,7 +61,7 @@ public class PlayerMovement : NhoxMonoBehaviour
         }
         else
         {
-            isWallSliding = false; // Reset trạng thái trượt tường khi chạm đất
+            isWallSliding = false;
         }
     }
 
@@ -158,7 +158,6 @@ public class PlayerMovement : NhoxMonoBehaviour
         }
         else if (InputManager.Instance.Direction.z > 0 && isWallSliding)
         {
-            // Wall Jumping
             float wallJumpDirection = isFacingRight ? -1f : 1f;
             rb2d.velocity = new Vector2(wallJumpDirection * wallJumpForce, jumpSpeed);
             isWallSliding = false;
@@ -215,7 +214,7 @@ public class PlayerMovement : NhoxMonoBehaviour
     void Flip()
     {
         isFacingRight = !isFacingRight;
-        transform.parent.localScale = new Vector3(isFacingRight ? 1 : -1, 1, 1);
+        transform.parent.Rotate(0f, 180f, 0f);
     }
 
     void UpdateState()
