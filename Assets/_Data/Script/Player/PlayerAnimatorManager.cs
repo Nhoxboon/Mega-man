@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAnimatorManager : NhoxMonoBehaviour
@@ -21,29 +19,35 @@ public class PlayerAnimatorManager : NhoxMonoBehaviour
 
     protected virtual void UpdateAnimator()
     {
-       
-        switch(playerCtrl.PlayerMovement.StateManager)
+        bool isShooting = playerCtrl.PlayerShooting.IssShooting;
+
+        switch (playerCtrl.PlayerMovement.StateManager)
         {
             case PlayerState.Idle:
                 anim.SetInteger("state", 0);
+                anim.SetBool("isShooting", isShooting);
                 break;
             case PlayerState.Run:
                 anim.SetInteger("state", 1);
+                anim.SetBool("isShooting", isShooting);
                 break;
             case PlayerState.Jump:
                 anim.SetInteger("state", 2);
+                anim.SetBool("isShooting", isShooting);
                 break;
             case PlayerState.Fall:
                 anim.SetInteger("state", 3);
+                anim.SetBool("isShooting", isShooting);
                 break;
             case PlayerState.WallSliding:
-                //
+                // Add wall sliding logic here if needed
                 break;
             case PlayerState.WallJumping:
-                //
+                // Add wall jumping logic here if needed
                 break;
             case PlayerState.Dash:
                 anim.SetInteger("state", 4);
+                anim.SetBool("isShooting", isShooting);
                 break;
         }
     }
@@ -60,5 +64,10 @@ public class PlayerAnimatorManager : NhoxMonoBehaviour
         if (anim != null) return;
         anim = GetComponent<Animator>();
         Debug.Log(transform.name + " loaded Animator", gameObject);
+    }
+
+    public virtual void Reset()
+    {
+        anim.SetBool("isShooting", false);
     }
 }
