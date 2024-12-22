@@ -21,6 +21,11 @@ public class NhoxMonoBehaviour : MonoBehaviour
         //For override
     }
 
+    public virtual void Reset()
+    {
+        this.LoadComponents();
+    }
+
 
     protected virtual void OnEnable()
     {

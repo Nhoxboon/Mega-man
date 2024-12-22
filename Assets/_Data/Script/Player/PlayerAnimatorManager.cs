@@ -40,10 +40,11 @@ public class PlayerAnimatorManager : NhoxMonoBehaviour
                 anim.SetBool("isShooting", isShooting);
                 break;
             case PlayerState.WallSliding:
-                // Add wall sliding logic here if needed
+                anim.SetInteger("state", 5);
+                //anim.SetBool("isShooting", isShooting);
                 break;
             case PlayerState.WallJumping:
-                // Add wall jumping logic here if needed
+                anim.SetInteger("state", 6);
                 break;
             case PlayerState.Dash:
                 anim.SetInteger("state", 4);
@@ -66,7 +67,7 @@ public class PlayerAnimatorManager : NhoxMonoBehaviour
         Debug.Log(transform.name + " loaded Animator", gameObject);
     }
 
-    public virtual void Reset()
+    public override void Reset()
     {
         anim.SetBool("isShooting", false);
     }
